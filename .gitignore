@@ -7,12 +7,15 @@ node_modules/
 .expo/
 dist/
 web-build/
-expo-env.d.ts
+
+# IDEs
+.idea/
 
 # Native
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
@@ -37,5 +40,5 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders
-/ios
-/android
+# /ios
+# /android
