@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
 import { getSettings, saveSettings } from '../utils/settings';
+import * as Contacts from 'expo-contacts';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -11,6 +12,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const [message, setMessage] = useState<string>('');
   const [alertPin, setAlertPin] = useState<string>('1234');
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Selector de contactos
+  const [contactsModalVisible, setContactsModalVisible] = useState<boolean>(false);
+  const [deviceContacts, setDeviceContacts] = useState<Contacts.Contact[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeContactIndex, setActiveContactIndex] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -83,6 +90,52 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
     setContacts(newContacts);
   };
 
+  const openContactPicker = async (index: number) => {
+    setActiveContactIndex(index);
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status === 'granted') {
+        const { data } = await Contacts.getContactsAsync({
+          fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+        });
+        if (data.length > 0) {
+          // Filtrar solo contactos que tengan números de teléfono
+          const validContacts = data.filter(c => c.phoneNumbers && c.phoneNumbers.length > 0);
+          setDeviceContacts(validContacts);
+          setSearchQuery('');
+          setContactsModalVisible(true);
+        } else {
+          Alert.alert('Info', 'No se encontraron contactos en tu agenda.');
+        }
+      } else {
+        Alert.alert('Permiso denegado', 'No se puede acceder a tus contactos sin permiso.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudieron leer los contactos.');
+    }
+  };
+
+  const handleSelectContact = (contact: Contacts.Contact) => {
+    if (activeContactIndex === null) return;
+    
+    const phoneNumbers = contact.phoneNumbers;
+    if (!phoneNumbers || phoneNumbers.length === 0) {
+      Alert.alert('Error', 'Este contacto no tiene números de teléfono.');
+      return;
+    }
+
+    let number = phoneNumbers[0].number || '';
+    
+    // Limpieza de caracteres del número
+    number = number.replace(/[\s\-\(\)]/g, '');
+    
+    const newContacts = [...contacts];
+    newContacts[activeContactIndex] = number;
+    setContacts(newContacts);
+    
+    setContactsModalVisible(false);
+  };
+
   if (loading) return <View style={styles.container}><Text style={styles.title}>Cargando...</Text></View>;
 
   return (
@@ -144,6 +197,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
                 keyboardType="phone-pad"
               />
               <TouchableOpacity 
+                style={styles.pickerButton} 
+                onPress={() => openContactPicker(index)}
+              >
+                <Text style={styles.pickerText}>👤</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
                 style={styles.deleteButton} 
                 onPress={() => removeContact(index)}
               >
@@ -162,6 +221,58 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
           <Text style={styles.backButtonText}>Descartar</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal del Selector de Contactos */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={contactsModalVisible}
+        onRequestClose={() => setContactsModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalOverlay}>
+          <View style={styles.contactsModalContent}>
+            <View style={styles.contactsModalHeader}>
+              <Text style={styles.contactsModalTitle}>Seleccionar Contacto</Text>
+              <TouchableOpacity onPress={() => setContactsModalVisible(false)}>
+                <Text style={styles.closeModalText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <TextInput
+              style={styles.searchBar}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Buscar por nombre..."
+              placeholderTextColor="#666"
+              clearButtonMode="while-editing"
+            />
+            
+            <FlatList
+              data={filteredContacts}
+              keyExtractor={(item) => item.id || Math.random().toString()}
+              renderItem={({ item }) => {
+                const name = `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.name || 'Sin Nombre';
+                const mainPhone = item.phoneNumbers && item.phoneNumbers[0]?.number;
+                return (
+                  <TouchableOpacity 
+                    style={styles.contactItem}
+                    onPress={() => handleSelectContact(item)}
+                  >
+                    <Text style={styles.contactItemName}>{name}</Text>
+                    {mainPhone && <Text style={styles.contactItemPhone}>{mainPhone}</Text>}
+                  </TouchableOpacity>
+                );
+              }}
+              ItemSeparatorComponent={() => <View style={styles.contactSeparator} />}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyContacts}>
+                  <Text style={styles.emptyContactsText}>No se encontraron contactos</Text>
+                </View>
+              )}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -282,6 +393,88 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     color: '#888',
+    fontSize: 16,
+  },
+  pickerButton: {
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    backgroundColor: '#222',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  pickerText: {
+    color: '#aaa',
+    fontSize: 18,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'flex-end',
+  },
+  contactsModalContent: {
+    flex: 1,
+    backgroundColor: '#111',
+    width: '100%',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    borderWidth: 1,
+    borderColor: '#222',
+    padding: 20,
+    marginTop: Platform.OS === 'ios' ? 50 : 20,
+  },
+  contactsModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  contactsModalTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  closeModalText: {
+    color: '#f09a36',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  searchBar: {
+    backgroundColor: '#1c1c1c',
+    color: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+    marginBottom: 15,
+  },
+  contactItem: {
+    paddingVertical: 15,
+  },
+  contactItemName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  contactItemPhone: {
+    color: '#888',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  contactSeparator: {
+    height: 1,
+    backgroundColor: '#222',
+  },
+  emptyContacts: {
+    padding: 30,
+    alignItems: 'center',
+  },
+  emptyContactsText: {
+    color: '#666',
     fontSize: 16,
   },
 });
