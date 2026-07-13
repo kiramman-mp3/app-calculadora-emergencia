@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform, Modal, FlatList, SafeAreaView } from 'react-native';
-import { getSettings, saveSettings } from '../utils/settings';
+import { getSettings, saveSettings, CalculatorTheme, EmergencySettings } from '../utils/settings';
 import * as Contacts from 'expo-contacts';
 
 interface SettingsScreenProps {
@@ -11,6 +11,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const [contacts, setContacts] = useState<string[]>(['']);
   const [message, setMessage] = useState<string>('');
   const [alertPin, setAlertPin] = useState<string>('1234');
+  const [theme, setTheme] = useState<CalculatorTheme>('ios');
   const [loading, setLoading] = useState<boolean>(true);
 
   // Selector de contactos
@@ -34,6 +35,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
       setContacts(settings.contacts.length > 0 ? settings.contacts : ['']);
       setMessage(settings.message);
       setAlertPin(settings.alertPin || '1234');
+      setTheme(settings.theme || 'ios');
     } catch (error) {
       console.error('Error loading settings:', error);
     } finally {
@@ -71,6 +73,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
       contacts: validContacts, 
       message: message.trim() || 'Necesito ayuda. Mi ubicación:',
       alertPin: pinTrimmed,
+      theme: theme,
+      isFirstLaunch: false,
     });
     Alert.alert('Éxito', 'Configuración guardada correctamente.');
     onBack();
@@ -181,6 +185,33 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
             maxLength={8}
           />
           <Text style={styles.hint}>PIN numérico (4-8 dígitos) que activará la alerta al presionar "=".</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Tema de Camuflaje (Calculadora)</Text>
+          <View style={styles.themeRow}>
+            <TouchableOpacity 
+              style={[styles.themeOptionButton, theme === 'ios' && styles.themeOptionButtonActive]}
+              onPress={() => setTheme('ios')}
+            >
+              <Text style={[styles.themeOptionText, theme === 'ios' && styles.themeOptionTextActive]}>iOS (Apple)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.themeOptionButton, theme === 'samsung' && styles.themeOptionButtonActive]}
+              onPress={() => setTheme('samsung')}
+            >
+              <Text style={[styles.themeOptionText, theme === 'samsung' && styles.themeOptionTextActive]}>Samsung</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.themeOptionButton, theme === 'xiaomi' && styles.themeOptionButtonActive]}
+              onPress={() => setTheme('xiaomi')}
+            >
+              <Text style={[styles.themeOptionText, theme === 'xiaomi' && styles.themeOptionTextActive]}>Xiaomi</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.hint}>Muestra la interfaz adaptada al estilo de calculadora de esta marca.</Text>
         </View>
 
         <View style={styles.section}>
@@ -481,6 +512,34 @@ const styles = StyleSheet.create({
   emptyContactsText: {
     color: '#666',
     fontSize: 16,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  themeOptionButton: {
+    flex: 1,
+    backgroundColor: '#1c1c1e',
+    borderWidth: 1.5,
+    borderColor: '#333',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  themeOptionButtonActive: {
+    borderColor: '#f09a36',
+    backgroundColor: '#26170d',
+  },
+  themeOptionText: {
+    color: '#aaa',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  themeOptionTextActive: {
+    color: '#f09a36',
+    fontWeight: 'bold',
   },
 });
 

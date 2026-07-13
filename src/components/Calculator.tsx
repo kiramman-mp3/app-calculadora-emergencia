@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { CalculatorTheme } from '../utils/settings';
 
 const { width } = Dimensions.get('window');
 
@@ -7,6 +8,7 @@ interface CalculatorProps {
   onPinCorrect: () => void;
   onLongPressC: () => void;
   alertPin?: string;
+  theme?: CalculatorTheme;
 }
 
 interface CalculatorState {
@@ -137,7 +139,7 @@ const calculatorReducer = (state: CalculatorState, action: CalculatorAction): Ca
   }
 };
 
-const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC, alertPin = '1234' }) => {
+const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC, alertPin = '1234', theme = 'ios' }) => {
   const [state, dispatch] = useReducer(calculatorReducer, initialState);
 
   const handlePress = (value: string) => {
@@ -166,6 +168,66 @@ const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC, ale
     ['0', '.', '=']
   ];
 
+  const getButtonStyles = (btn: string) => {
+    const isOperator = ['+', '-', 'x', '÷', '='].includes(btn);
+    const isSpecial = ['C', '±', '%'].includes(btn);
+    
+    let btnStyle: any = [styles.button];
+    let txtStyle: any = [styles.buttonText];
+
+    if (theme === 'samsung') {
+      btnStyle.push({ borderRadius: 24, backgroundColor: '#171717' });
+      txtStyle.push({ color: '#fff', fontWeight: '400' });
+      
+      if (isOperator) {
+        if (btn === '=') {
+          btnStyle.push({ backgroundColor: '#2ec150' });
+          txtStyle.push({ color: '#fff' });
+        } else {
+          txtStyle.push({ color: '#2ec150' });
+        }
+      } else if (isSpecial) {
+        txtStyle.push({ color: '#2ec150' });
+      }
+      
+      if (btn === '0') {
+        btnStyle.push(styles.zeroButton);
+      }
+    } 
+    else if (theme === 'xiaomi') {
+      btnStyle.push({ borderRadius: 12, backgroundColor: '#1c1c1e' });
+      txtStyle.push({ color: '#fff', fontWeight: '300' });
+
+      if (isOperator) {
+        if (btn === '=') {
+          btnStyle.push({ backgroundColor: '#ff6b00' });
+          txtStyle.push({ color: '#fff' });
+        } else {
+          txtStyle.push({ color: '#ff6b00' });
+        }
+      } else if (isSpecial) {
+        txtStyle.push({ color: '#a5a5a5' });
+      }
+
+      if (btn === '0') {
+        btnStyle.push(styles.zeroButton);
+      }
+    } 
+    else {
+      // Default: iOS
+      btnStyle.push(isOperator ? styles.operatorButton : styles.numberButton);
+      if (isSpecial) {
+        btnStyle.push(styles.specialButton);
+        txtStyle.push(styles.specialButtonText);
+      }
+      if (btn === '0') {
+        btnStyle.push(styles.zeroButton);
+      }
+    }
+
+    return { btnStyle, txtStyle };
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.displayContainer}>
@@ -174,26 +236,21 @@ const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC, ale
       <View style={styles.buttonsContainer}>
         {buttons.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.row}>
-            {row.map((btn) => (
-              <TouchableOpacity
-                key={btn}
-                style={[
-                    styles.button, 
-                    ['+', '-', 'x', '÷', '='].includes(btn) ? styles.operatorButton : styles.numberButton,
-                    ['C', '±', '%'].includes(btn) ? styles.specialButton : null,
-                    btn === '0' ? styles.zeroButton : null
-                ]}
-                onPress={() => handlePress(btn)}
-                onLongPress={btn === 'C' ? onLongPressC : undefined}
-                delayLongPress={2000}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.buttonText,
-                  ['C', '±', '%'].includes(btn) ? styles.specialButtonText : null
-                ]}>{btn}</Text>
-              </TouchableOpacity>
-            ))}
+            {row.map((btn) => {
+              const { btnStyle, txtStyle } = getButtonStyles(btn);
+              return (
+                <TouchableOpacity
+                  key={btn}
+                  style={btnStyle}
+                  onPress={() => handlePress(btn)}
+                  onLongPress={btn === 'C' ? onLongPressC : undefined}
+                  delayLongPress={2000}
+                  activeOpacity={0.7}
+                >
+                  <Text style={txtStyle}>{btn}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         ))}
       </View>
