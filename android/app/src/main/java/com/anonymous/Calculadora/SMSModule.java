@@ -30,8 +30,10 @@ public class SMSModule extends ReactContextBaseJavaModule {
     public void sendSMS(String phoneNumber, String message, Promise promise) {
         try {
             if (ContextCompat.checkSelfPermission(reactContext, Manifest.permission.SEND_SMS) 
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
-                promise.reject("PERMISSION_DENIED", "Usted no tiene permisos para enviar SMS.");
+                promise.reject("PERMISSION_DENIED", "Faltan permisos requeridos de SMS o Estado del Teléfono.");
                 return;
             }
 
