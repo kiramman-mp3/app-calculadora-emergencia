@@ -4,6 +4,7 @@ import { getSettings } from '../utils/settings';
 import * as Battery from 'expo-battery';
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
+import * as Haptics from 'expo-haptics';
 
 export const EMERGENCY_TASK_NAME = 'emergency-location-task';
 
@@ -11,6 +12,9 @@ export const EMERGENCY_TASK_NAME = 'emergency-location-task';
 TaskManager.defineTask(EMERGENCY_TASK_NAME, async ({ data, error }) => {
   if (error) {
     console.error('Background task error:', error);
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } catch (e) {}
     return;
   }
   if (data) {
@@ -45,8 +49,17 @@ TaskManager.defineTask(EMERGENCY_TASK_NAME, async ({ data, error }) => {
             await sendSilentSMS(contact.trim(), fullMessage);
           }
         }
+
+        // Feedback háptico discreto de éxito (doble tap)
+        try {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (hErr) {}
+
       } catch (err) {
         console.error('Error in background SMS loop:', err);
+        try {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        } catch (e) {}
       } finally {
         // Detener inmediatamente el rastreo para apagar el Foreground Service
         await Location.stopLocationUpdatesAsync(EMERGENCY_TASK_NAME);
@@ -58,6 +71,11 @@ TaskManager.defineTask(EMERGENCY_TASK_NAME, async ({ data, error }) => {
 export const useEmergency = () => {
   const triggerEmergency = async (): Promise<void> => {
     try {
+      // 1. Feedback háptico de vibración pesada al activar el PIN de alerta
+      try {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      } catch (hErr) {}
+
       const settings = await getSettings();
       const contacts = settings.contacts;
 
@@ -100,6 +118,12 @@ export const useEmergency = () => {
             await sendSilentSMS(contact.trim(), fullMessage);
           }
         }
+
+        // Feedback háptico discreto de éxito (doble tap) en primer plano
+        try {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (hErr) {}
+
         return;
       }
 
@@ -115,6 +139,10 @@ export const useEmergency = () => {
         },
       });
     } catch (error) {
+      // Feedback de advertencia si algo falla al iniciar
+      try {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      } catch (hErr) {}
       console.log('E_TRG_ERR'); 
     }
   };
