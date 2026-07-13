@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { getSettings, saveSettings } from '../utils/settings';
 
+interface SettingsScreenProps {
+  onBack: () => void;
+}
 
-const SettingsScreen = ({ onBack }) => {
-  const [contacts, setContacts] = useState(['']);
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true);
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
+  const [contacts, setContacts] = useState<string[]>(['']);
+  const [message, setMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadData();
@@ -15,7 +18,7 @@ const SettingsScreen = ({ onBack }) => {
   const loadData = async () => {
     try {
       const settings = await getSettings();
-       setContacts(settings.contacts.length > 0 ? settings.contacts : ['']);
+      setContacts(settings.contacts.length > 0 ? settings.contacts : ['']);
       setMessage(settings.message);
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -24,7 +27,7 @@ const SettingsScreen = ({ onBack }) => {
     }
   };
 
-  const validatePhone = (phone) => {
+  const validatePhone = (phone: string): boolean => {
     // Basic phone validation: needs to start with + and have at least 10 digits
     const phoneRegex = /^\+?[0-9]{10,15}$/;
     return phoneRegex.test(phone.replace(/\s/g, ''));
@@ -60,12 +63,12 @@ const SettingsScreen = ({ onBack }) => {
     setContacts([...contacts, '']);
   };
 
-  const removeContact = (index) => {
+  const removeContact = (index: number) => {
     const newContacts = contacts.filter((_, i) => i !== index);
     setContacts(newContacts.length > 0 ? newContacts : ['']);
   };
 
-  const updateContact = (text, index) => {
+  const updateContact = (text: string, index: number) => {
     const newContacts = [...contacts];
     newContacts[index] = text;
     setContacts(newContacts);
