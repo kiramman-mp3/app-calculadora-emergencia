@@ -2,11 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = '@emergency_settings';
 
+export type CalculatorTheme = 'ios' | 'samsung' | 'xiaomi';
+
 export interface EmergencySettings {
   contacts: string[];
   message: string;
   alertPin?: string;
   isFirstLaunch?: boolean;
+  theme?: CalculatorTheme;
 }
 
 const DEFAULT_SETTINGS: EmergencySettings = {
@@ -14,6 +17,7 @@ const DEFAULT_SETTINGS: EmergencySettings = {
   message: 'Necesito ayuda. Mi ubicación:',
   alertPin: '1234',
   isFirstLaunch: true,
+  theme: 'ios',
 };
 
 export const getSettings = async (): Promise<EmergencySettings> => {

@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Platform, PermissionsAndroid, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
 import * as Contacts from 'expo-contacts';
+import { CalculatorTheme } from '../utils/settings';
 
 const { width, height } = Dimensions.get('window');
 
 interface OnboardingScreenProps {
-  onFinish: () => void;
+  onFinish: (theme: CalculatorTheme) => void;
 }
 
 type PermissionStatus = 'undetermined' | 'granted' | 'denied';
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [selectedTheme, setSelectedTheme] = useState<CalculatorTheme>('ios');
   const [locationPermission, setLocationPermission] = useState<PermissionStatus>('undetermined');
   const [contactsPermission, setContactsPermission] = useState<PermissionStatus>('undetermined');
   const [smsPermission, setSmsPermission] = useState<PermissionStatus>('undetermined');
@@ -96,10 +98,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   const handleNext = () => {
-    if (currentSlide < 3) {
+    if (currentSlide < 4) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      onFinish();
+      onFinish(selectedTheme);
     }
   };
 
@@ -141,8 +143,57 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           </View>
         )}
 
-        {/* Slide 2: Acceder a Ajustes */}
+        {/* Slide 2: Selecciona tu Camuflaje */}
         {currentSlide === 1 && (
+          <View style={styles.slide}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconEmoji}>🎨</Text>
+            </View>
+            <Text style={styles.title}>Selecciona tu Camuflaje</Text>
+            <Text style={styles.subtitle}>Elige el diseño que coincida con tu teléfono para una discreción total</Text>
+
+            <View style={styles.themeSelectorContainer}>
+              {/* Opción iOS */}
+              <TouchableOpacity 
+                style={[styles.themeCard, selectedTheme === 'ios' && styles.themeCardSelected]}
+                onPress={() => setSelectedTheme('ios')}
+              >
+                <View style={styles.themeCardHeader}>
+                  <Text style={styles.themeEmoji}>🍎</Text>
+                  <Text style={styles.themeName}>Estilo iOS</Text>
+                </View>
+                <Text style={styles.themeDesc}>Diseño clásico de iPhone con botones redondos y operadores en color naranja.</Text>
+              </TouchableOpacity>
+
+              {/* Opción Samsung */}
+              <TouchableOpacity 
+                style={[styles.themeCard, selectedTheme === 'samsung' && styles.themeCardSelected]}
+                onPress={() => setSelectedTheme('samsung')}
+              >
+                <View style={styles.themeCardHeader}>
+                  <Text style={styles.themeEmoji}>📱</Text>
+                  <Text style={styles.themeName}>Estilo Samsung</Text>
+                </View>
+                <Text style={styles.themeDesc}>Diseño One UI con esquinas redondeadas tipo squircle y acentos en verde Samsung.</Text>
+              </TouchableOpacity>
+
+              {/* Opción Xiaomi */}
+              <TouchableOpacity 
+                style={[styles.themeCard, selectedTheme === 'xiaomi' && styles.themeCardSelected]}
+                onPress={() => setSelectedTheme('xiaomi')}
+              >
+                <View style={styles.themeCardHeader}>
+                  <Text style={styles.themeEmoji}>🔥</Text>
+                  <Text style={styles.themeName}>Estilo Xiaomi</Text>
+                </View>
+                <Text style={styles.themeDesc}>Diseño MIUI plano con bordes compactos ligeramente redondeados y acentos en naranja Xiaomi.</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Slide 3: Acceder a Ajustes */}
+        {currentSlide === 2 && (
           <View style={styles.slide}>
             <View style={styles.iconContainer}>
               <Text style={styles.iconEmoji}>⚙️</Text>
@@ -158,8 +209,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           </View>
         )}
 
-        {/* Slide 3: Alerta a tus Contactos */}
-        {currentSlide === 2 && (
+        {/* Slide 4: Alerta a tus Contactos */}
+        {currentSlide === 3 && (
           <View style={styles.slide}>
             <View style={styles.iconContainer}>
               <Text style={styles.iconEmoji}>🚨</Text>
@@ -175,8 +226,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           </View>
         )}
 
-        {/* Slide 4: Solicitar Permisos */}
-        {currentSlide === 3 && (
+        {/* Slide 5: Solicitar Permisos */}
+        {currentSlide === 4 && (
           <View style={styles.slide}>
             <View style={styles.iconContainer}>
               <Text style={styles.iconEmoji}>🔓</Text>
@@ -243,7 +294,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       {/* Indicador de progreso e inferior */}
       <View style={styles.footer}>
         <View style={styles.dotsContainer}>
-          {[0, 1, 2, 3].map((idx) => (
+          {[0, 1, 2, 3, 4].map((idx) => (
             <View 
               key={idx} 
               style={[
@@ -265,7 +316,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
           <TouchableOpacity style={styles.navButtonPrimary} onPress={handleNext}>
             <Text style={styles.navButtonPrimaryText}>
-              {currentSlide === 3 ? 'Comenzar' : 'Siguiente'}
+              {currentSlide === 4 ? 'Comenzar' : 'Siguiente'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -472,6 +523,43 @@ const styles = StyleSheet.create({
   emptyNavPlaceholder: {
     flex: 1,
     marginRight: 10,
+  },
+  themeSelectorContainer: {
+    width: '100%',
+    marginVertical: 10,
+  },
+  themeCard: {
+    backgroundColor: '#111',
+    borderWidth: 1.5,
+    borderColor: '#222',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    width: '100%',
+  },
+  themeCardSelected: {
+    borderColor: '#f09a36',
+    backgroundColor: '#1c140d',
+  },
+  themeCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  themeEmoji: {
+    fontSize: 22,
+    marginRight: 10,
+  },
+  themeName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  themeDesc: {
+    color: '#aaa',
+    fontSize: 12,
+    lineHeight: 18,
+    paddingLeft: 32,
   },
 });
 
