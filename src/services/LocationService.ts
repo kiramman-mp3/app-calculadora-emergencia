@@ -1,6 +1,13 @@
 import * as Location from 'expo-location';
 
-export const getCurrentLocation = async () => {
+export interface LocationData {
+  latitude: number;
+  longitude: number;
+  accuracy: number | null;
+  googleMapsLink: string;
+}
+
+export const getCurrentLocation = async (): Promise<LocationData> => {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
@@ -14,6 +21,7 @@ export const getCurrentLocation = async () => {
     return {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
+      accuracy: location.coords.accuracy,
       googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${location.coords.latitude},${location.coords.longitude}`,
     };
   } catch (error) {

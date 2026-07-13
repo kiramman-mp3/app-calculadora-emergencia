@@ -1,9 +1,13 @@
 import { NativeModules, Platform, Alert, PermissionsAndroid } from 'react-native';
 import * as SMS from 'expo-sms';
 
-const { SMSModule } = NativeModules;
+interface SMSModuleType {
+  sendSMS(phoneNumber: string, message: string): Promise<string>;
+}
 
-export const sendSilentSMS = async (phoneNumber, message) => {
+const SMSModule = NativeModules.SMSModule as SMSModuleType | undefined;
+
+export const sendSilentSMS = async (phoneNumber: string, message: string): Promise<string> => {
   console.log(`[!] Iniciando envío automático para: ${phoneNumber}`);
 
   // 1. INTENTO: Módulo Nativo Automático (Directo desde el dispositivo)
