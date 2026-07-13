@@ -19,6 +19,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeContactIndex, setActiveContactIndex] = useState<number | null>(null);
 
+  const filteredContacts = deviceContacts.filter(c => {
+    const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
   useEffect(() => {
     loadData();
   }, []);
