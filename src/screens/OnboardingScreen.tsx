@@ -43,7 +43,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       // SMS (Android)
       if (Platform.OS === 'android') {
         const hasSms = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.SEND_SMS);
-        setSmsPermission(hasSms ? 'granted' : 'undetermined');
+        const hasPhoneState = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE);
+        setSmsPermission(hasSms && hasPhoneState ? 'granted' : 'undetermined');
       } else {
         setSmsPermission('granted'); // iOS usa fallback de expo-sms sin este permiso nativo
       }
@@ -82,17 +83,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const requestSms = async () => {
     if (Platform.OS !== 'android') return;
     try {
-      const granted = await PermissionsAndroid.request(
+      const grants = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.SEND_SMS,
-        {
-          title: "Permiso de Envío de SMS",
-          message: "CalcuRescue requiere permisos para enviar mensajes de auxilio en segundo plano sin intervención manual.",
-          buttonNeutral: "Luego",
-          buttonNegative: "Cancelar",
-          buttonPositive: "OK"
-        }
-      );
-      setSmsPermission(granted === PermissionsAndroid.RESULTS.GRANTED ? 'granted' : 'denied');
+        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+      ]);
+      const smsGranted = grants[PermissionsAndroid.PERMISSIONS.SEND_SMS] === PermissionsAndroid.RESULTS.GRANTED;
+      const phoneStateGranted = grants[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] === PermissionsAndroid.RESULTS.GRANTED;
+      setSmsPermission(smsGranted && phoneStateGranted ? 'granted' : 'denied');
     } catch (e) {
       setSmsPermission('denied');
     }

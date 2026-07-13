@@ -13,25 +13,22 @@ export const sendSilentSMS = async (phoneNumber: string, message: string): Promi
   // 1. INTENTO: Módulo Nativo Automático (Directo desde el dispositivo)
   if (Platform.OS === 'android' && SMSModule) {
     try {
-      // Solicitar permiso explícitamente si aún no se tiene
-      const granted = await PermissionsAndroid.request(
+      // Solicitar permisos de SMS y Estado del Teléfono explícitamente
+      const grants = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.SEND_SMS,
-        {
-          title: "Permiso para enviar SMS",
-          message: "Esta aplicación necesita enviar mensajes SMS durante emergencias.",
-          buttonNeutral: "Luego",
-          buttonNegative: "Cancelar",
-          buttonPositive: "OK"
-        }
-      );
+        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+      ]);
 
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Permiso concedido. Intentando envío nativo silencioso...');
+      const smsGranted = grants[PermissionsAndroid.PERMISSIONS.SEND_SMS] === PermissionsAndroid.RESULTS.GRANTED;
+      const phoneStateGranted = grants[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] === PermissionsAndroid.RESULTS.GRANTED;
+
+      if (smsGranted && phoneStateGranted) {
+        console.log('Permisos de SMS y Teléfono concedidos. Intentando envío nativo silencioso...');
         const result = await SMSModule.sendSMS(phoneNumber, message);
         console.log('Resultado nativo:', result);
         return result;
       } else {
-        console.warn('Permiso de SMS denegado por el usuario.');
+        console.warn('Permisos requeridos denegados por el usuario.');
       }
     } catch (error) {
       console.error('Error en envío nativo:', error);
