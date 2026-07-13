@@ -6,12 +6,14 @@ export interface EmergencySettings {
   contacts: string[];
   message: string;
   alertPin?: string;
+  isFirstLaunch?: boolean;
 }
 
 const DEFAULT_SETTINGS: EmergencySettings = {
   contacts: [],
   message: 'Necesito ayuda. Mi ubicación:',
   alertPin: '1234',
+  isFirstLaunch: true,
 };
 
 export const getSettings = async (): Promise<EmergencySettings> => {

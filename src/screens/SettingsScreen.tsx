@@ -254,7 +254,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
             
             <FlatList
               data={filteredContacts}
-              keyExtractor={(item) => item.id || Math.random().toString()}
+              keyExtractor={(item) => (item as any).id || Math.random().toString()}
               renderItem={({ item }) => {
                 const name = `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.name || 'Sin Nombre';
                 const mainPhone = item.phoneNumbers && item.phoneNumbers[0]?.number;
