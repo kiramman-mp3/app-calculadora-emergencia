@@ -9,6 +9,7 @@ interface SettingsScreenProps {
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
   const [contacts, setContacts] = useState<string[]>(['']);
   const [message, setMessage] = useState<string>('');
+  const [alertPin, setAlertPin] = useState<string>('1234');
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -20,6 +21,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
       const settings = await getSettings();
       setContacts(settings.contacts.length > 0 ? settings.contacts : ['']);
       setMessage(settings.message);
+      setAlertPin(settings.alertPin || '1234');
     } catch (error) {
       console.error('Error loading settings:', error);
     } finally {
@@ -47,9 +49,16 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
       return;
     }
 
+    const pinTrimmed = alertPin.trim();
+    if (!/^[0-9]{4,8}$/.test(pinTrimmed)) {
+      Alert.alert('Error', 'El PIN de alerta debe ser numérico y tener entre 4 y 8 dígitos.');
+      return;
+    }
+
     await saveSettings({ 
       contacts: validContacts, 
       message: message.trim() || 'Necesito ayuda. Mi ubicación:',
+      alertPin: pinTrimmed,
     });
     Alert.alert('Éxito', 'Configuración guardada correctamente.');
     onBack();
@@ -99,6 +108,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
             numberOfLines={3}
           />
           <Text style={styles.hint}>Se enviará junto con tu ubicación de Google Maps.</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>PIN de Alerta Secreto</Text>
+          <TextInput
+            style={styles.input}
+            value={alertPin}
+            onChangeText={setAlertPin}
+            placeholder="Ej: 1234"
+            placeholderTextColor="#666"
+            keyboardType="numeric"
+            secureTextEntry
+            maxLength={8}
+          />
+          <Text style={styles.hint}>PIN numérico (4-8 dígitos) que activará la alerta al presionar "=".</Text>
         </View>
 
         <View style={styles.section}>
