@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, StatusBar, SafeAreaView, Alert, Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import Calculator from './src/components/Calculator';
 import SettingsScreen from './src/screens/SettingsScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useEmergency } from './src/hooks/useEmergency';
-import { getSettings, EmergencySettings } from './src/utils/settings';
+import { getSettings, saveSettings, EmergencySettings } from './src/utils/settings';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function App(): React.JSX.Element {
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [settings, setSettings] = useState<EmergencySettings | null>(null);
   const [pinPromptVisible, setPinPromptVisible] = useState<boolean>(false);
   const [enteredPin, setEnteredPin] = useState<string>('');
@@ -20,6 +22,21 @@ export default function App(): React.JSX.Element {
   const loadSettings = async () => {
     const s = await getSettings();
     setSettings(s);
+    if (s.isFirstLaunch) {
+      setShowOnboarding(true);
+    }
+  };
+
+  const handleFinishOnboarding = async () => {
+    if (settings) {
+      const updatedSettings = {
+        ...settings,
+        isFirstLaunch: false,
+      };
+      await saveSettings(updatedSettings);
+      setSettings(updatedSettings);
+    }
+    setShowOnboarding(false);
   };
 
   const handlePinCorrect = (): void => {
@@ -63,16 +80,26 @@ export default function App(): React.JSX.Element {
     }
   };
 
+  if (settings === null) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
-      {showSettings ? (
+      {showOnboarding ? (
+        <OnboardingScreen onFinish={handleFinishOnboarding} />
+      ) : showSettings ? (
         <SettingsScreen onBack={() => setShowSettings(false)} />
       ) : (
         <Calculator 
           onPinCorrect={handlePinCorrect} 
           onLongPressC={handleLongPressC} 
-          alertPin={settings?.alertPin || '1234'}
+          alertPin={settings.alertPin || '1234'}
         />
       )}
 
