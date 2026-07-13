@@ -5,8 +5,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green?style=flat-square)](https://developer.android.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Download APK](https://img.shields.io/badge/Download-APK-orange.svg?style=flat-square&logo=android&logoColor=white)](https://github.com/kiramman-mp3/CalcuRescue/releases/latest/download/app-release.apk)
 
 **CalcuRescue** es una aplicación de seguridad personal camuflada bajo la apariencia de una calculadora aritmética real y completamente funcional. Diseñada para proteger a personas en situaciones de alto riesgo o peligro inminente, permite disparar alertas silenciosas de emergencia sin levantar sospechas.
+
+> [!TIP]
+> **¿Quieres probar la app en tu teléfono físico?**
+> Puedes descargar directamente el archivo instalador APK listo para usar desde la sección de lanzamientos:
+> 📦 **[Descargar CalcuRescue APK (Última versión)](https://github.com/kiramman-mp3/CalcuRescue/releases/latest/download/app-release.apk)**
 
 ---
 
