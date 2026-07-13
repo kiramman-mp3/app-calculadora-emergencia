@@ -4,7 +4,7 @@ import Calculator from './src/components/Calculator';
 import SettingsScreen from './src/screens/SettingsScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useEmergency } from './src/hooks/useEmergency';
-import { getSettings, saveSettings, EmergencySettings } from './src/utils/settings';
+import { getSettings, saveSettings, EmergencySettings, CalculatorTheme } from './src/utils/settings';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function App(): React.JSX.Element {
@@ -27,11 +27,12 @@ export default function App(): React.JSX.Element {
     }
   };
 
-  const handleFinishOnboarding = async () => {
+  const handleFinishOnboarding = async (theme: CalculatorTheme) => {
     if (settings) {
       const updatedSettings = {
         ...settings,
         isFirstLaunch: false,
+        theme: theme,
       };
       await saveSettings(updatedSettings);
       setSettings(updatedSettings);
@@ -100,6 +101,7 @@ export default function App(): React.JSX.Element {
           onPinCorrect={handlePinCorrect} 
           onLongPressC={handleLongPressC} 
           alertPin={settings.alertPin || '1234'}
+          theme={settings.theme || 'ios'}
         />
       )}
 
