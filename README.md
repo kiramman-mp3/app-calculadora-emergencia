@@ -4,15 +4,16 @@
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb?style=flat-square&logo=react)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green?style=flat-square)](https://developer.android.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**CalcuRescue** es una aplicación de seguridad personal de alto rendimiento camuflada bajo la apariencia de una calculadora aritmética real y completamente funcional. Diseñada para proteger a personas en situaciones de alto riesgo o peligro inminente, permite disparar alertas silenciosas de emergencia sin levantar sospechas.
+**CalcuRescue** es una aplicación de seguridad personal camuflada bajo la apariencia de una calculadora aritmética real y completamente funcional. Diseñada para proteger a personas en situaciones de alto riesgo o peligro inminente, permite disparar alertas silenciosas de emergencia sin levantar sospechas.
 
 ---
 
 ## 🛡️ Descripción
 
 ### ¿Qué problema resuelve?
-En situaciones de peligro (como robos, secuestros exprés o violencia de género), intentar abrir la aplicación de mensajería tradicional para pedir ayuda puede poner en riesgo al usuario si el agresor está vigilando. **CalcuRescue** resuelve este problema ofreciendo un medio de auxilio totalmente discreto e inmediato.
+En situaciones de peligro como secuestros exprés o violencia de género, intentar abrir la aplicación de mensajería tradicional para pedir ayuda puede poner en riesgo al usuario si el agresor está vigilando. **CalcuRescue** resuelve este problema ofreciendo un medio de auxilio totalmente discreto e inmediato.
 
 ### ¿Qué hace?
 A primera vista, la aplicación es una calculadora común que permite hacer sumas, restas y operaciones matemáticas reales. Sin embargo, al digitar una clave numérica secreta y presionar el botón `=`, la aplicación ejecuta en segundo plano un protocolo de rescate:
@@ -22,14 +23,14 @@ A primera vista, la aplicación es una calculadora común que permite hacer suma
 4. Genera alertas vibratorias táctiles (hápticas) discretas que confirman el envío al tacto del usuario sin emitir ningún sonido ni cambiar la pantalla de la calculadora.
 
 ### ¿Para quién está pensado?
-Para cualquier persona que requiera un botón de pánico de bolsillo altamente discreto y que no dependa de servidores externos, garantizando una privacidad del 100% y una disponibilidad constante.
+Para cualquier persona que requiera un botón de pánico de bolsillo discreto y que no dependa de servidores externos, garantizando una privacidad del 100% y una disponibilidad constante.
 
 ---
 
 ## ✨ Características
 
-*   **Camuflaje por Marca (Temas):** Permite cambiar el diseño estético de la calculadora entre estilos visuales de **iOS (Apple)**, **Samsung (One UI)** y **Xiaomi (MIUI)** para replicar el estilo de calculadora nativo de tu dispositivo móvil.
-*   **Acceso Secreto Protegido:** El acceso a la pantalla de configuración está protegido con autenticación biométrica (Face ID / Huella digital) y un PIN numérico de respaldo, disparado al mantener presionado el botón `C` por 2 segundos.
+*   **Camuflaje por Marca (Temas):** Permite cambiar el diseño estético de la calculadora entre estilos visuales de **iOS (Apple)**, **Samsung (One UI)** y **Xiaomi (MIUI)** para replicar el estilo de calculadora nativo de tu dispositivo móvil para no sospechar a terceros.
+*   **Acceso Secreto Protegido:** El acceso a la pantalla de configuración está protegido con autenticación biométrica (Face ID / Huella digital) y un PIN numérico de respaldo en caso de no tener un acceso biometrico, disparado al mantener presionado el botón `C` por 2 segundos.
 *   **Envío de SMS Nativo Silencioso:** Integra un módulo Java nativo para Android que envía SMS directamente sin abrir ventanas de diálogo externas.
 *   **Soporte de Doble SIM (Multi-SIM):** El puente nativo resuelve dinámicamente el identificador de suscripción (`subscriptionId`) activo de la tarjeta SIM preferida para SMS, previniendo fallos en dispositivos Dual-SIM.
 *   **Geolocalización Ininterrumpida en Segundo Plano:** Utiliza `expo-task-manager` y Foreground Services para crear una notificación persistente de sistema en Android al iniciar el auxilio, asegurando que el hilo de JS no sea suspendido por ahorro de energía, liberando los recursos al terminar.
@@ -157,7 +158,7 @@ Para iniciar el empaquetador de Expo y arrancar el servidor Metro de desarrollo:
 npm run start
 ```
 
-### Compilar y Ejecutar en Android (Físico o Emulador)
+### Compilar y Ejecutar en Android
 Para compilar la aplicación nativa de Android, instalarla en el dispositivo conectado por USB e iniciar el debugger:
 ```bash
 npm run android
@@ -190,9 +191,8 @@ npm run ios
 - [x] Historial de importación de contactos mediante agenda nativa y buscador inteligente.
 - [x] Temas estéticos por marca (iOS, Samsung y Xiaomi) para camuflaje perfecto.
 - [x] Asistente de bienvenida y gestor guiado de permisos (Onboarding).
-- [ ] Soporte para envío de SMS silencioso nativo en iOS (actualmente limitado a fallback `expo-sms` por sandboxing de Apple).
+- [ ] Incorporación de metadatos multimedia en SMS (imagen y audio).
 - [ ] Incorporación de un panel de historial local de geolocalizaciones enviadas para el usuario.
-- [ ] Opción de envío de alertas mediante servicios de red en la nube (Webhooks / Telegram Bot fallback).
 
 ---
 
@@ -208,7 +208,7 @@ Lista de contribuidores que han aportado commits al desarrollo de este repositor
 
 ## 📄 Licencia
 
-El proyecto no posee una licencia de código abierto definida actualmente. Todos los derechos quedan reservados para los autores originales indicados en el historial del repositorio.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para obtener más detalles.
 
 ---
 
