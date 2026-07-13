@@ -37,11 +37,31 @@ public class SMSModule extends ReactContextBaseJavaModule {
                 return;
             }
 
-            SmsManager smsManager;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                smsManager = reactContext.getSystemService(SmsManager.class);
-            } else {
-                smsManager = SmsManager.getDefault();
+            SmsManager smsManager = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                try {
+                    int subId = android.telephony.SubscriptionManager.getDefaultSmsSubscriptionId();
+                    if (subId != android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            SmsManager baseSms = reactContext.getSystemService(SmsManager.class);
+                            if (baseSms != null) {
+                                smsManager = baseSms.createForSubscriptionId(subId);
+                            }
+                        } else {
+                            smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
+                        }
+                    }
+                } catch (Exception subEx) {
+                    // Fallback
+                }
+            }
+
+            if (smsManager == null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    smsManager = reactContext.getSystemService(SmsManager.class);
+                } else {
+                    smsManager = SmsManager.getDefault();
+                }
             }
 
             if (smsManager == null) {
