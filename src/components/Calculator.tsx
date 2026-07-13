@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -6,68 +6,155 @@ const { width } = Dimensions.get('window');
 interface CalculatorProps {
   onPinCorrect: () => void;
   onLongPressC: () => void;
+  alertPin?: string;
 }
 
-const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC }) => {
-  const [display, setDisplay] = useState<string>('0');
-  const [currentValue, setCurrentValue] = useState<string>('');
-  const [operator, setOperator] = useState<string | null>(null);
-  const [result, setResult] = useState<string | null>(null);
+interface CalculatorState {
+  display: string;
+  currentValue: string;
+  operator: string | null;
+  result: string | null;
+}
 
-  const calculate = (a: string, b: string, op: string): number | string => {
-    const num1 = parseFloat(a);
-    const num2 = parseFloat(b);
-    switch (op) {
-      case '+': return num1 + num2;
-      case '-': return num1 - num2;
-      case 'x': return num1 * num2;
-      case '÷': return num2 !== 0 ? num1 / num2 : 'Error';
-      default: return num2;
-    }
-  };
+type CalculatorAction =
+  | { type: 'CLEAR' }
+  | { type: 'SET_OPERATOR'; payload: string }
+  | { type: 'EVALUATE'; pin: string; onPinCorrect: () => void }
+  | { type: 'INPUT_DOT' }
+  | { type: 'INPUT_NUMBER'; payload: string }
+  | { type: 'TOGGLE_SIGN' }
+  | { type: 'PERCENT' };
 
-  const handlePress = (value: string) => {
-    if (value === 'C') {
-      setDisplay('0');
-      setCurrentValue('');
-      setOperator(null);
-      setResult(null);
-    } else if (['+', '-', 'x', '÷'].includes(value)) {
-      if (currentValue === '') return;
-      if (operator && currentValue) {
-        const res = calculate(result || '0', currentValue, operator);
-        setResult(String(res));
-        setDisplay(String(res));
-      } else {
-        setResult(currentValue);
+const initialState: CalculatorState = {
+  display: '0',
+  currentValue: '',
+  operator: null,
+  result: null,
+};
+
+const calculate = (a: string, b: string, op: string): number | string => {
+  const num1 = parseFloat(a);
+  const num2 = parseFloat(b);
+  switch (op) {
+    case '+': return num1 + num2;
+    case '-': return num1 - num2;
+    case 'x': return num1 * num2;
+    case '÷': return num2 !== 0 ? num1 / num2 : 'Error';
+    default: return num2;
+  }
+};
+
+const calculatorReducer = (state: CalculatorState, action: CalculatorAction): CalculatorState => {
+  switch (action.type) {
+    case 'CLEAR':
+      return initialState;
+
+    case 'SET_OPERATOR': {
+      const op = action.payload;
+      if (state.currentValue === '') return state;
+      if (state.operator && state.currentValue) {
+        const res = calculate(state.result || '0', state.currentValue, state.operator);
+        return {
+          operator: op,
+          result: String(res),
+          display: String(res),
+          currentValue: '',
+        };
       }
-      setOperator(value);
-      setCurrentValue('');
-    } else if (value === '=') {
-      if (display === '1234') {
-        onPinCorrect();
-        setDisplay('0');
-        setCurrentValue('');
-        return;
+      return {
+        ...state,
+        operator: op,
+        result: state.currentValue,
+        currentValue: '',
+      };
+    }
+
+    case 'EVALUATE': {
+      const { display, operator, result, currentValue } = state;
+      if (display === action.pin) {
+        action.onPinCorrect();
+        return initialState;
       }
       if (operator && currentValue) {
         const res = calculate(result || '0', currentValue, operator);
         const resStr = String(res);
-        setDisplay(resStr);
-        setResult(resStr);
-        setOperator(null);
-        setCurrentValue(resStr);
+        return {
+          display: resStr,
+          result: resStr,
+          operator: null,
+          currentValue: resStr,
+        };
       }
+      return state;
+    }
+
+    case 'INPUT_DOT': {
+      if (!state.currentValue.includes('.')) {
+        const newValue = (state.currentValue === '' ? '0' : state.currentValue) + '.';
+        return {
+          ...state,
+          currentValue: newValue,
+          display: newValue,
+        };
+      }
+      return state;
+    }
+
+    case 'INPUT_NUMBER': {
+      const val = action.payload;
+      const newValue = state.currentValue === '0' ? val : state.currentValue + val;
+      return {
+        ...state,
+        currentValue: newValue,
+        display: newValue,
+      };
+    }
+
+    case 'TOGGLE_SIGN': {
+      if (state.currentValue === '') return state;
+      const num = parseFloat(state.currentValue);
+      const newValue = String(num * -1);
+      return {
+        ...state,
+        currentValue: newValue,
+        display: newValue,
+      };
+    }
+
+    case 'PERCENT': {
+      if (state.currentValue === '') return state;
+      const num = parseFloat(state.currentValue);
+      const newValue = String(num / 100);
+      return {
+        ...state,
+        currentValue: newValue,
+        display: newValue,
+      };
+    }
+
+    default:
+      return state;
+  }
+};
+
+const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC, alertPin = '1234' }) => {
+  const [state, dispatch] = useReducer(calculatorReducer, initialState);
+
+  const handlePress = (value: string) => {
+    if (value === 'C') {
+      dispatch({ type: 'CLEAR' });
+    } else if (['+', '-', 'x', '÷'].includes(value)) {
+      dispatch({ type: 'SET_OPERATOR', payload: value });
+    } else if (value === '=') {
+      dispatch({ type: 'EVALUATE', pin: alertPin, onPinCorrect });
     } else if (value === '.') {
-      if (!currentValue.includes('.')) {
-        const newValue = (currentValue === '' ? '0' : currentValue) + '.';
-        setCurrentValue(newValue);
-        setDisplay(newValue);
-      }
+      dispatch({ type: 'INPUT_DOT' });
+    } else if (value === '±') {
+      dispatch({ type: 'TOGGLE_SIGN' });
+    } else if (value === '%') {
+      dispatch({ type: 'PERCENT' });
     } else {
-      const newValue = currentValue === '0' ? value : currentValue + value;
-      setCurrentValue(newValue);
-      setDisplay(newValue);
+      dispatch({ type: 'INPUT_NUMBER', payload: value });
     }
   };
 
@@ -82,7 +169,7 @@ const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC }) =
   return (
     <View style={styles.container}>
       <View style={styles.displayContainer}>
-        <Text style={styles.display} numberOfLines={1} adjustsFontSizeToFit>{display}</Text>
+        <Text style={styles.display} numberOfLines={1} adjustsFontSizeToFit>{state.display}</Text>
       </View>
       <View style={styles.buttonsContainer}>
         {buttons.map((row, rowIndex) => (
