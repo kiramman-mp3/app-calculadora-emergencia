@@ -3,7 +3,7 @@ import { getCurrentLocation } from '../services/LocationService';
 import { getSettings } from '../utils/settings';
 
 export const useEmergency = () => {
-  const triggerEmergency = async () => {
+  const triggerEmergency = async (): Promise<void> => {
     try {
       const settings = await getSettings();
       const contacts = settings.contacts;

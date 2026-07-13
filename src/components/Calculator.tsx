@@ -3,13 +3,18 @@ import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-nati
 
 const { width } = Dimensions.get('window');
 
-const Calculator = ({ onPinCorrect, onLongPressC }) => {
-  const [display, setDisplay] = useState('0');
-  const [currentValue, setCurrentValue] = useState('');
-  const [operator, setOperator] = useState(null);
-  const [result, setResult] = useState(null);
+interface CalculatorProps {
+  onPinCorrect: () => void;
+  onLongPressC: () => void;
+}
 
-  const calculate = (a, b, op) => {
+const Calculator: React.FC<CalculatorProps> = ({ onPinCorrect, onLongPressC }) => {
+  const [display, setDisplay] = useState<string>('0');
+  const [currentValue, setCurrentValue] = useState<string>('');
+  const [operator, setOperator] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+
+  const calculate = (a: string, b: string, op: string): number | string => {
     const num1 = parseFloat(a);
     const num2 = parseFloat(b);
     switch (op) {
@@ -21,7 +26,7 @@ const Calculator = ({ onPinCorrect, onLongPressC }) => {
     }
   };
 
-  const handlePress = (value) => {
+  const handlePress = (value: string) => {
     if (value === 'C') {
       setDisplay('0');
       setCurrentValue('');
@@ -46,7 +51,7 @@ const Calculator = ({ onPinCorrect, onLongPressC }) => {
         return;
       }
       if (operator && currentValue) {
-        const res = calculate(result, currentValue, operator);
+        const res = calculate(result || '0', currentValue, operator);
         const resStr = String(res);
         setDisplay(resStr);
         setResult(resStr);
@@ -66,7 +71,7 @@ const Calculator = ({ onPinCorrect, onLongPressC }) => {
     }
   };
 
-  const buttons = [
+  const buttons: string[][] = [
     ['C', '±', '%', '÷'],
     ['7', '8', '9', 'x'],
     ['4', '5', '6', '-'],
