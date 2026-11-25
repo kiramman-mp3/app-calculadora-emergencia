@@ -1,5 +1,7 @@
 # 📱 CalcuRescue
 
+> **Proyecto pequeño, pendiente de refactorización.** Lo mantengo publicado como parte de mi recorrido. Mis proyectos actuales están en [madebyjohan.xyz](https://madebyjohan.xyz/proyectos).
+
 [![Expo SDK 54](https://img.shields.io/badge/Expo-SDK%2054-blue?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb?style=flat-square&logo=react)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
